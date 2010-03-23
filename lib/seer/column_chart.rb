@@ -7,6 +7,8 @@ module Seer
   #   @data = Widgets.all # Must be an array, and must respond
   #                       # to the data method specified below (in this example, 'quantity')
   #
+  #   @series = @data.map{|w| w.widget_stats} # An array of arrays
+  #
   # In your view:
   #
   #   <div id="chart"></div>
@@ -73,16 +75,6 @@ module Seer
       @data_table = []
       
     end
-  
-#    def data_table #:nodoc:
-#      data.each_with_index do |datum, column|
-#        @data_table << [
-#          "            Seer.chartsData[chartIndex].setValue(#{column}, 0,'#{datum.send(label_method)}');\r",
-#          "            Seer.chartsData[chartIndex].setValue(#{column}, 1, #{datum.send(data_method)});\r"
-#        ]
-#      end
-#      @data_table
-#    end
 
     def is_3_d #:nodoc:
       @is_3_d.blank? ? false : @is_3_d
@@ -149,13 +141,6 @@ module Seer
       
     def self.render(data, args) #:nodoc:
       graph = Seer::ColumnChart.new(
-#        :data           => data,
-#        :label_method   => args[:series][:series_label],
-#        :data_method    => args[:series][:data_method],
-#        :chart_options  => args[:chart_options],
-#        :chart_element  => args[:in_element] || 'chart'
-#
-#
         :data => data,
         :series_label   => args[:series][:series_label],
         :data_series    => args[:series][:data_series],
