@@ -42,7 +42,7 @@ module Seer
     include Seer::Chart
     
     # Chart options accessors
-    attr_accessor :axis_color, :axis_background_color, :axis_font_size, :background_color, :border_color, :data_table, :enable_tooltip, :focus_border_color, :height, :is_3_d, :is_stacked, :legend, :legend_background_color, :legend_font_size, :legend_text_color, :log_scale, :max, :min, :reverse_axis, :show_categories, :title, :title_x, :title_y, :title_color, :title_font_size, :tooltip_font_size, :tooltip_height, :tooltip_width, :width
+    attr_accessor :axis_color, :axis_background_color, :axis_font_size, :background_color, :border_color, :data_table, :enable_tooltip, :focus_border_color, :height, :is_3_d, :is_stacked, :legend, :legend_background_color, :legend_font_size, :legend_text_color, :log_scale, :max, :min, :reverse_axis, :show_categories, :title, :title_x, :title_y, :title_color, :title_font_size, :tooltip_font_size, :tooltip_height, :tooltip_width, :width, :on_select, :on_select
     
     # Graph data
     attr_accessor :data, :data_method, :label_method
@@ -69,8 +69,8 @@ module Seer
     def data_table #:nodoc:
       data.each_with_index do |datum, column|
         @data_table << [
-          "            data.setValue(#{column}, 0,'#{datum.send(label_method)}');\r",
-          "            data.setValue(#{column}, 1, #{datum.send(data_method)});\r"
+          "            Seer.chartsData[chartIndex].setValue(#{column}, 0,'#{datum.send(label_method)}');\r",
+          "            Seer.chartsData[chartIndex].setValue(#{column}, 1, #{datum.send(data_method)});\r"
         ]
       end
       @data_table
@@ -95,14 +95,17 @@ module Seer
           google.load('visualization', '1', {'packages':['barchart']});
           google.setOnLoadCallback(drawChart);
           function drawChart() {
-            var data = new google.visualization.DataTable();
+            var chartIndex = Seer.chartsCount;
+            Seer.chartsData[chartIndex] = new google.visualization.DataTable();
 #{data_columns}
 #{data_table.to_s}
             var options = {};
 #{options}
             var container = document.getElementById('#{self.chart_element}');
-            var chart = new google.visualization.BarChart(container);
-            chart.draw(data, options);
+            Seer.charts[chartIndex] = new google.visualization.BarChart(container);
+            Seer.charts[chartIndex].draw(Seer.chartsData[chartIndex], options);
+            #{ @on_select ? "\ngoogle.visualization.events.addListener(Seer.charts[chartIndex], 'select', " + @on_select + ");" : ''}
+            Seer.chartsCount += 1;
           }
         </script>
       }

@@ -15,7 +15,12 @@ module Seer
   #         @widgets, 
   #         :as => :column_chart,
   #         :in_element => 'chart',
-  #         :series => {:series_label => 'name', :data_method => 'quantity'},
+  #         :series => {
+  #           :series_label => 'name',
+  #           :data_label => 'date',
+  #           :data_method => 'quantity',
+  #           :data_series => @series
+  #         },
   #         :chart_options => {
   #           :height   => 300,
   #           :width    => 300,
@@ -42,10 +47,13 @@ module Seer
     include Seer::Chart
     
     # Chart options accessors
-    attr_accessor :axis_color, :axis_background_color, :axis_font_size, :background_color, :border_color, :enable_tooltip, :focus_border_color, :height, :is_3_d, :is_stacked, :legend, :legend_background_color, :legend_font_size, :legend_text_color, :log_scale, :max, :min, :reverse_axis, :show_categories, :title, :title_x, :title_y, :title_color, :title_font_size, :tooltip_font_size, :tooltip_height, :tooltip_width, :width
+    attr_accessor :axis_color, :axis_background_color, :axis_font_size, :background_color, :border_color, :enable_tooltip, :focus_border_color, :height, :is_3_d, :is_stacked, :legend, :legend_background_color, :legend_font_size, :legend_text_color, :log_scale, :max, :min, :reverse_axis, :show_categories, :title, :title_x, :title_y, :title_color, :title_font_size, :tooltip_font_size, :tooltip_height, :tooltip_width, :width, :on_select
     
     # Graph data
-    attr_accessor :data, :data_method, :data_table, :label_method
+    #attr_accessor :data, :data_method, :data_table, :label_method
+
+    # Graph data
+    attr_accessor :data, :data_label, :data_method, :data_series, :data_table, :series_label
     
     def initialize(args={}) #:nodoc:
 
@@ -66,15 +74,15 @@ module Seer
       
     end
   
-    def data_table #:nodoc:
-      data.each_with_index do |datum, column|
-        @data_table << [
-          "            data.setValue(#{column}, 0,'#{datum.send(label_method)}');\r",
-          "            data.setValue(#{column}, 1, #{datum.send(data_method)});\r"
-        ]
-      end
-      @data_table
-    end
+#    def data_table #:nodoc:
+#      data.each_with_index do |datum, column|
+#        @data_table << [
+#          "            Seer.chartsData[chartIndex].setValue(#{column}, 0,'#{datum.send(label_method)}');\r",
+#          "            Seer.chartsData[chartIndex].setValue(#{column}, 1, #{datum.send(data_method)});\r"
+#        ]
+#      end
+#      @data_table
+#    end
 
     def is_3_d #:nodoc:
       @is_3_d.blank? ? false : @is_3_d
@@ -85,7 +93,35 @@ module Seer
     end
     
     def string_options #:nodoc:
-      [:axis_color, :axis_background_color, :background_color, :border_color, :focus_border_color, :legend, :legend_background_color, :legend_text_color, :title, :title_x, :title_y, :title_color]
+      [:axis_color, :axis_background_color, :background_color, :border_color, :focus_border_color, :legend, :legend_background_color, :legend_text_color, :title, :title_x, :title_y, :title_color, :on_select]
+    end
+
+    def data_columns  #:nodoc:
+      _data_columns =  "            Seer.chartsData[chartIndex].addRows(#{data_rows.size});\r"
+      _data_columns << "            Seer.chartsData[chartIndex].addColumn('string', 'Date');\r"
+      data.each do |datum|
+        _data_columns << "            Seer.chartsData[chartIndex].addColumn('number', '#{datum.send(series_label)}');\r"
+      end
+      _data_columns
+    end
+
+    def data_table  #:nodoc:
+      _rows = data_rows
+      _rows.each_with_index do |r,i|
+        @data_table << "            Seer.chartsData[chartIndex].setCell(#{i}, 0,'#{r}');\r"
+      end
+      data_series.each_with_index do |column,i|
+        column.each_with_index do |c,j|
+          @data_table << "Seer.chartsData[chartIndex].setCell(#{j},#{i+1},#{c.send(data_method)});\r"
+        end
+      end
+      @data_table
+    end
+
+    def data_rows
+      data_series.inject([]) do |rows, element|
+        rows |= element.map { |e| e.send(data_label) }
+      end
     end
     
     def to_js #:nodoc:
@@ -95,14 +131,17 @@ module Seer
           google.load('visualization', '1', {'packages':['columnchart']});
           google.setOnLoadCallback(drawChart);
           function drawChart() {
-            var data = new google.visualization.DataTable();
+            var chartIndex = Seer.chartsCount;
+            Seer.chartsData[chartIndex] = new google.visualization.DataTable();
 #{data_columns}
 #{data_table.to_s}
             var options = {};
-#{options}
+#{options}  
             var container = document.getElementById('#{self.chart_element}');
-            var chart = new google.visualization.ColumnChart(container);
-            chart.draw(data, options);
+            Seer.charts[chartIndex] = new google.visualization.ColumnChart(container);
+            Seer.charts[chartIndex].draw(Seer.chartsData[chartIndex], options);
+            #{ @on_select ? "\ngoogle.visualization.events.addListener(Seer.charts[chartIndex], 'select', " + @on_select + ");" : ''}
+            Seer.chartsCount += 1;
           }
         </script>
       }
@@ -110,8 +149,17 @@ module Seer
       
     def self.render(data, args) #:nodoc:
       graph = Seer::ColumnChart.new(
-        :data           => data,
-        :label_method   => args[:series][:series_label],
+#        :data           => data,
+#        :label_method   => args[:series][:series_label],
+#        :data_method    => args[:series][:data_method],
+#        :chart_options  => args[:chart_options],
+#        :chart_element  => args[:in_element] || 'chart'
+#
+#
+        :data => data,
+        :series_label   => args[:series][:series_label],
+        :data_series    => args[:series][:data_series],
+        :data_label     => args[:series][:data_label],
         :data_method    => args[:series][:data_method],
         :chart_options  => args[:chart_options],
         :chart_element  => args[:in_element] || 'chart'

@@ -32,9 +32,9 @@ module Seer
     end
     
     def data_columns
-      _data_columns =  "            data.addRows(#{data_table.size});\r"
-      _data_columns << "            data.addColumn('string', '#{label_method}');\r"
-      _data_columns << "            data.addColumn('number', '#{data_method}');\r"
+      _data_columns =  "            Seer.chartsData[chartIndex].addRows(#{data_table.size});\r"
+      _data_columns << "            Seer.chartsData[chartIndex].addColumn('string', '#{label_method}');\r"
+      _data_columns << "            Seer.chartsData[chartIndex].addColumn('number', '#{data_method}');\r"
       _data_columns
     end
     

@@ -61,8 +61,8 @@ module Seer
     def data_table #:nodoc:
       data.each_with_index do |datum, column|
         @data_table << [
-          "            data.setValue(#{column}, 0,'#{datum.send(label_method)}');\r",
-          "            data.setValue(#{column}, 1, #{datum.send(data_method)});\r"
+          "            Seer.chartsData[chartIndex].setValue(#{column}, 0,'#{datum.send(label_method)}');\r",
+          "            Seer.chartsData[chartIndex].setValue(#{column}, 1, #{datum.send(data_method)});\r"
         ]
       end
       @data_table
@@ -87,14 +87,16 @@ module Seer
           google.load('visualization', '1', {'packages':['piechart']});
           google.setOnLoadCallback(drawChart);
           function drawChart() {
-            var data = new google.visualization.DataTable();
+            var chartIndex = Seer.chartsCount;
+            Seer.chartsData[chartIndex] = new google.visualization.DataTable();
 #{data_columns}
 #{data_table.to_s}
             var options = {};
 #{options}
             var container = document.getElementById('#{self.chart_element}');
-            var chart = new google.visualization.PieChart(container);
-            chart.draw(data, options);
+            Seer.charts[chartIndex] = new google.visualization.PieChart(container);
+            Seer.charts[chartIndex].draw(Seer.chartsData[chartIndex], options);
+            Seer.chartsCount += 1;
           }
         </script>
       }

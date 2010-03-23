@@ -42,7 +42,7 @@ module Seer
     include Seer::Chart
     
     # Graph options
-    attr_accessor :axis_color, :axis_background_color, :axis_font_size, :background_color, :border_color, :enable_tooltip, :focus_border_color, :height, :legend, :legend_background_color, :legend_font_size, :legend_text_color, :line_size, :log_scale, :max, :min, :point_size, :reverse_axis, :show_categories, :smooth_line, :title, :title_x, :title_y, :title_color, :title_font_size, :tooltip_font_size, :tooltip_height, :number, :tooltip_width, :width
+    attr_accessor :axis_color, :axis_background_color, :axis_font_size, :background_color, :border_color, :enable_tooltip, :focus_border_color, :height, :legend, :legend_background_color, :legend_font_size, :legend_text_color, :line_size, :log_scale, :max, :min, :point_size, :reverse_axis, :show_categories, :smooth_line, :title, :title_x, :title_y, :title_color, :title_font_size, :tooltip_font_size, :tooltip_height, :number, :tooltip_width, :width, :on_select
     
     # Graph data
     attr_accessor :data, :data_label, :data_method, :data_series, :data_table, :series_label
@@ -66,10 +66,10 @@ module Seer
     end
   
     def data_columns  #:nodoc:
-      _data_columns =  "            data.addRows(#{data_rows.size});\r"
-      _data_columns << "            data.addColumn('string', 'Date');\r"
+      _data_columns =  "            Seer.chartsData[chartIndex].addRows(#{data_rows.size});\r"
+      _data_columns << "            Seer.chartsData[chartIndex].addColumn('string', 'Date');\r"
       data.each do |datum|
-        _data_columns << "            data.addColumn('number', '#{datum.send(series_label)}');\r"
+        _data_columns << "            Seer.chartsData[chartIndex].addColumn('number', '#{datum.send(series_label)}');\r"
       end
       _data_columns
     end
@@ -77,11 +77,11 @@ module Seer
     def data_table  #:nodoc:
       _rows = data_rows
       _rows.each_with_index do |r,i|
-        @data_table << "            data.setCell(#{i}, 0,'#{r}');\r"
+        @data_table << "            Seer.chartsData[chartIndex].setCell(#{i}, 0,'#{r}');\r"
       end
       data_series.each_with_index do |column,i|
         column.each_with_index do |c,j|
-          @data_table << "data.setCell(#{j},#{i+1},#{c.send(data_method)});\r"
+          @data_table << "Seer.chartsData[chartIndex].setCell(#{j},#{i+1},#{c.send(data_method)});\r"
         end
       end
       @data_table
@@ -108,14 +108,17 @@ module Seer
           google.load('visualization', '1', {'packages':['linechart']});
           google.setOnLoadCallback(drawChart);
           function drawChart() {
-            var data = new google.visualization.DataTable();
+            var chartIndex = Seer.chartsCount;
+            Seer.chartsData[chartIndex] = new google.visualization.DataTable();
 #{data_columns}
 #{data_table.to_s}
             var options = {};
 #{options}
             var container = document.getElementById('#{self.chart_element}');
-            var chart = new google.visualization.LineChart(container);
-            chart.draw(data, options);
+            Seer.charts[chartIndex] = new google.visualization.LineChart(container);
+            Seer.charts[chartIndex].draw(Seer.chartsData[chartIndex], options);
+            #{ @on_select ? "\ngoogle.visualization.events.addListener(Seer.charts[chartIndex], 'select', " + @on_select + ");" : ''}
+            Seer.chartsCount += 1;
           }
         </script>
       }
