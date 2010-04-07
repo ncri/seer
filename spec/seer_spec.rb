@@ -78,11 +78,13 @@ describe "Seer" do
     it 'renders a column chart' do
       (Seer.send(:column_chart, 
         [0,1,2,3],
-        :as => :column_chart,
+        :as => :line_chart,
         :in_element => 'chart',
         :series => {
           :series_label => 'to_s',
-          :data_method => 'size'
+          :data_label => 'to_s',
+          :data_method => 'size',
+          :data_series => [[1,2,3],[3,4,5]]
         },
         :chart_options => {}
       ) =~ /columnchart/).should be_true

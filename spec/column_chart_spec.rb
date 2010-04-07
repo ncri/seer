@@ -5,7 +5,9 @@ describe "Seer::ColumnChart" do
   before :each do
     @chart = Seer::ColumnChart.new(
       :data => [0,1,2,3],
-      :label_method   => 'to_s',
+      :series_label   => 'to_s',
+      :data_series => [[1,2,3],[3,4,5]],
+      :data_label => 'to_s',
       :data_method => 'size',
       :chart_options  => {},
       :chart_element  => 'chart'
@@ -34,18 +36,25 @@ describe "Seer::ColumnChart" do
   end
   
   it 'sets its data columns' do
-    @chart.data_columns.should =~ /addRows\(4\)/
+    @chart.data_columns.should =~ /addRows\(5\)/
+    @chart.data_columns.should add_column('string', 'Date')
+    @chart.data_columns.should add_column('number', '0')
+    @chart.data_columns.should add_column('number', '1')
+    @chart.data_columns.should add_column('number', '2')
+    @chart.data_columns.should add_column('number', '3')
   end
-  
+
   it 'sets its data table' do
-    @chart.data_table.to_s.should set_value(0, 0,'0')
-    @chart.data_table.to_s.should set_value(0, 1, 8)
-    @chart.data_table.to_s.should set_value(1, 0,'1')
-    @chart.data_table.to_s.should set_value(1, 1, 8)
-    @chart.data_table.to_s.should set_value(2, 0,'2')
-    @chart.data_table.to_s.should set_value(2, 1, 8)
-    @chart.data_table.to_s.should set_value(3, 0,'3')
-    @chart.data_table.to_s.should set_value(3, 1, 8)
+    @chart.data_table.to_s.should set_cell(0, 0,'1')
+    @chart.data_table.to_s.should set_cell(1, 0,'2')
+    @chart.data_table.to_s.should set_cell(2, 0,'3')
+    @chart.data_table.to_s.should set_cell(3, 0,'4')
+    @chart.data_table.to_s.should set_cell(4, 0,'5')
+    @chart.data_table.to_s.should set_cell(0,1,8)
+    @chart.data_table.to_s.should set_cell(2,1,8)
+    @chart.data_table.to_s.should set_cell(0,2,8)
+    @chart.data_table.to_s.should set_cell(1,2,8)
+    @chart.data_table.to_s.should set_cell(2,2,8)
   end
   
 end
