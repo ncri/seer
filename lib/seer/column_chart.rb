@@ -100,14 +100,14 @@ module Seer
     def data_table  #:nodoc:
       _rows = data_rows
       _rows.each_with_index do |r,i|
-        @data_table << "            Seer.chartsData[chartIndex].setCell(#{i}, 0,'#{r}');\r"
+        @data_table << "            Seer.chartsData[chartIndex].setCell(#{i}, 0,'#{r}');\r".html_safe
       end
       data_series.each_with_index do |column,i|
         column.each_with_index do |c,j|
-          @data_table << "Seer.chartsData[chartIndex].setCell(#{j},#{i+1},#{c.send(data_method)});\r"
+          @data_table << "Seer.chartsData[chartIndex].setCell(#{j},#{i+1},#{c.send(data_method)});\r".html_safe
         end
       end
-      @data_table.html_safe
+      @data_table
     end
 
     def data_rows
