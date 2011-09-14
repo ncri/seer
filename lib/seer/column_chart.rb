@@ -113,7 +113,7 @@ module Seer
     def data_rows
       data_series.inject([]) do |rows, element|
         rows |= element.map { |e| e.send(data_label) }
-      end.html_safe
+      end
     end
     
     def to_js #:nodoc:
