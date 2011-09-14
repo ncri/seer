@@ -71,7 +71,7 @@ module Seer
       data.each do |datum|
         _data_columns << "            Seer.chartsData[chartIndex].addColumn('number', '#{datum.send(series_label)}');\r"
       end
-      _data_columns
+      _data_columns.html_safe
     end
     
     def data_table #:nodoc:

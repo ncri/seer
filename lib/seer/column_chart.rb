@@ -94,7 +94,7 @@ module Seer
       data.each do |datum|
         _data_columns << "            Seer.chartsData[chartIndex].addColumn('number', '#{datum.send(series_label)}');\r"
       end
-      _data_columns
+      _data_columns.html_safe
     end
 
     def data_table  #:nodoc:
@@ -107,13 +107,13 @@ module Seer
           @data_table << "Seer.chartsData[chartIndex].setCell(#{j},#{i+1},#{c.send(data_method)});\r"
         end
       end
-      @data_table
+      @data_table.html_safe
     end
 
     def data_rows
       data_series.inject([]) do |rows, element|
         rows |= element.map { |e| e.send(data_label) }
-      end
+      end.html_safe
     end
     
     def to_js #:nodoc:
@@ -136,7 +136,7 @@ module Seer
             Seer.chartsCount += 1;
           }
         </script>
-      }
+      }.html_safe
     end
       
     def self.render(data, args) #:nodoc:
@@ -149,7 +149,7 @@ module Seer
         :chart_options  => args[:chart_options],
         :chart_element  => args[:in_element] || 'chart'
       )
-      graph.to_js
+      graph.to_js.html_safe
     end
     
   end  

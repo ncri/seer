@@ -27,7 +27,7 @@ module Seer
       if @colors.include?('darker')
         @colors
       else
-        "[#{@colors.map{|color| "'#{color.gsub(/\#/,'')}'"} * ','}]"
+        "[#{@colors.map{|color| "'#{color.gsub(/\#/,'')}'"} * ','}]".html_safe
       end
     end
     
@@ -35,7 +35,7 @@ module Seer
       _data_columns =  "            Seer.chartsData[chartIndex].addRows(#{data_table.size});\r"
       _data_columns << "            Seer.chartsData[chartIndex].addColumn('string', '#{label_method}');\r"
       _data_columns << "            Seer.chartsData[chartIndex].addColumn('number', '#{data_method}');\r"
-      _data_columns
+      _data_columns.html_safe
     end
     
     def options
@@ -52,7 +52,7 @@ module Seer
         next unless self.send(opt)
         _options << "            options['#{opt.to_s.camelize(:lower)}'] = '#{self.send(opt)}';\r"
       end
-      _options
+      _options.html_safe
     end
         
   end

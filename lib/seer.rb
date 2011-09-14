@@ -21,7 +21,7 @@ module Seer
 
   def self.init_visualization
     %{<script type="text/javascript" src="http://www.google.com/jsapi">
-      </script><script type="text/javascript">var Seer = \{ chartsCount: 0, charts: [], chartsData: [] \}</script>      }
+      </script><script type="text/javascript">var Seer = \{ chartsCount: 0, charts: [], chartsData: [] \}</script>      }.html_safe
   end
   
   def self.visualize(data, args={})

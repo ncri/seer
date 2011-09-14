@@ -73,7 +73,7 @@ module Seer
           "            Seer.chartsData[chartIndex].setValue(#{column}, 1, #{datum.send(data_method)});\r"
         ]
       end
-      @data_table
+      @data_table.html_safe
     end
   
     def is_3_d #:nodoc:
@@ -108,7 +108,7 @@ module Seer
             Seer.chartsCount += 1;
           }
         </script>
-      }
+      }.html_safe
     end
       
     def self.render(data, args) #:nodoc:
