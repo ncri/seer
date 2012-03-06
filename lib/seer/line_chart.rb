@@ -84,13 +84,13 @@ module Seer
           @data_table << "Seer.chartsData[chartIndex].setCell(#{j},#{i+1},#{c.send(data_method)});\r"
         end
       end
-      @data_table.html_safe
+      @data_table.join('').html_safe
     end
     
     def data_rows
       data_series.inject([]) do |rows, element|
         rows |= element.map { |e| e.send(data_label) }
-      end.html_safe
+      end
     end
 
     def nonstring_options  #:nodoc:

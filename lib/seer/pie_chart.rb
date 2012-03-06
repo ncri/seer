@@ -65,7 +65,7 @@ module Seer
           "            Seer.chartsData[chartIndex].setValue(#{column}, 1, #{datum.send(data_method)});\r"
         ]
       end
-      @data_table.html_safe
+      @data_table.join('').html_safe
     end
 
     def is_3_d #:nodoc:
