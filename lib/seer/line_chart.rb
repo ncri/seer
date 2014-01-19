@@ -107,14 +107,15 @@ module Seer
         <script type="text/javascript">
           google.load('visualization', '1', {'packages':['linechart']});
           google.setOnLoadCallback(drawChart);
-          var options = {};
+          var seerChartOptions = [];
           function drawChart() {
             var chartIndex = Seer.chartsCount;
             Seer.chartsData[chartIndex] = new google.visualization.DataTable();
 #{data_columns}
 #{data_table.to_s}
-            
+            var options = {} 
 #{options}
+            Seer.chartsOptions.push(options);
             var container = document.getElementById('#{self.chart_element}');
             Seer.charts[chartIndex] = new google.visualization.LineChart(container);
             Seer.charts[chartIndex].draw(Seer.chartsData[chartIndex], options);
